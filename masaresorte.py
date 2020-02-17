@@ -1,34 +1,37 @@
-import matplotlib.pyplot as plt
-from matplotlib import animation
-from matplotlib.patches import ConnectionPatch
-
 import numpy as np 
 from scipy.integrate import odeint
 import math
 
-scale = 5
+#Para animaciones 
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from matplotlib.patches import ConnectionPatch
+
+#Constantes por fuera for performance purposes
+scale = 50
+lim = 130
+#Masas
+m1 = 30
+m2 = 50
+beta = 0.4 #Coeficiente de Friccioń
+#Constantes de Elasticidad
+k1 = 100
+k2 = 100
 
 def masaresorte(X, t):
-    #Masas
-    m1 = 30
-    m2 = 50
-    beta = 0.4 #Coeficiente de Friccioń
-    #Constantes de Elasticidad
-    k1 = 100
-    k2 = 100
+  
     #Movimiento cosenoidal (Multiplico por una escala para hacerlo más 'amplio')
-    cos = scale * math.cos(t)
+    offset = scale * math.cos(t)
 
-    #Después de unas oscilaciones, Se deja de mover el resorte 1
-    '''
-    if(t >= 120):
-        cos = 0
-'''
+    #Después de unas oscilaciones, Se deja de mover el resorte... 90 <= lim <= 180
+    if(t >= lim):
+        offset = 0
+
     x1,dx1, x2, dx2 = X
 
     #Ecuaciones
     #Ecuación para la masa 1
-    dv1dt = (-k1 * (x1 + cos) + k2*((x2+dx2) - (x1+dx1)) + beta*dx1)/m1
+    dv1dt = (-k1 * (x1 + offset) + k2*((x2+dx2) - (x1+dx1)) + beta*dx1)/m1
     #Ecuación para la masa 2
     dv2dt = (k2*(dx1 - dx2) + beta*dx2)/m2
 
@@ -43,25 +46,31 @@ t = np.linspace(90,180,10000)
 
 Y = odeint(masaresorte, [0, 0, 0, 0], t)
 
-#y[1,3] -> Gráfica de la aceleración en función del tiempo
-plt.plot(t,Y[:,1])
-plt.plot(t,Y[:,3])
-
-'''
-#y[0,2] -> Grafica de la velocidad en función del tiempo
-plt.plot(t,Y[:,0])
-plt.plot(t,Y[:,2])
-'''
-
+#Gráfica
 plt.xlabel('tiempo')
 plt.ylabel('aceleración')
 plt.axis('equal')
 plt.legend(['Carro 1','Carro 2'])
 
+#y[1,3] -> Gráfica de la aceleración en función del tiempo
+plt.plot(t,Y[:,1])
+plt.plot(t,Y[:,3])
+plt.show()
+#y[0,2] -> Grafica de la velocidad en función del tiempo
+
+plt.xlabel('tiempo')
+plt.ylabel('velocidad')
+plt.axis('equal')
+plt.legend(['Carro 1','Carro 2'])
+
+plt.plot(t,Y[:,0])
+plt.plot(t,Y[:,2])
+plt.show()
+
 fig = plt.figure()
-ax = plt.axes(xlim=(-30, 120), ylim=(0, 10))
-carrito1 = plt.Rectangle((10,3), 3, 2, color="blue",fill=True)
-carrito2 = plt.Rectangle((40,3), 3, 2, color="orange",fill=True)
+ax = plt.axes(xlim=(-60, 120), ylim=(0, 10))
+carrito1 = plt.Rectangle((10,3), 2, 2, color="blue",fill=True)
+carrito2 = plt.Rectangle((40,3), 2, 2, color="orange",fill=True)
 circle = plt.Circle((0,3), 0.5,color='red')
 line1 = plt.Arrow(0,4,10,0, width=0.2,color="black", hatch='o')
 line2 = plt.Arrow(20,4,10,0, width=0.2,color="black", hatch='o')
