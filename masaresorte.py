@@ -11,8 +11,9 @@ def masaresorte(X, t):
     #Constantes de Elasticidad
     k1 = 100
     k2 = 100
-    #Movimiento cosenoidal
-    cos = math.cos(t)
+    #Movimiento cosenoidal (Multiplico por 3 para hacerlo más 'amplio')
+    cos = 3*math.cos(t)
+
     x1,dx1, x2, dx2 = X
 
     dv1dt = (-k1 * cos - k2*x1 + k2*x2 + beta*dx1)/m1
@@ -23,8 +24,17 @@ def masaresorte(X, t):
 t = np.linspace(0,30,1000)
 y = odeint(masaresorte, [3,0,5,0], t)
 
-
+#y[1,3] -> Gráfica de la aceletación en función del tiempo
 plt.plot(t,y[:,1])
 plt.plot(t,y[:,3])
+#y[0,2] -> Grafica de la velocidad en función del tiempo
+'''
+plt.plot(t,y[:,0])
+plt.plot(t,y[:,2])
+'''
+
+plt.xlabel('tiempo')
+plt.ylabel('aceleración')
 plt.axis('equal')
+plt.legend(['Carro 1','Carro 2'])
 plt.show()
