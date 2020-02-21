@@ -8,63 +8,48 @@ from matplotlib import animation
 from matplotlib.patches import ConnectionPatch
 
 #Constantes por fuera for performance purposes
-scale = 50
-lim = 130
+scale = 0.3 # 0 < scale < 6
+lim = 5
 #Masas
-m1 = 30
-m2 = 50
-beta = 0.4 #Coeficiente de Friccioń
+m1 = 10
+m2 = 5
+beta = 4 #Coeficiente de Friccioń
 #Constantes de Elasticidad
 k1 = 100
 k2 = 100
+#Tamaño de los resortes en reposo
+l1 = 10
+l2 = 10
 
 def masaresorte(X, t):
-  
     #Movimiento cosenoidal (Multiplico por una escala para hacerlo más 'amplio')
-    offset = scale * math.cos(t)
+    offset = scale * math.cos(2*t)
 
-    #Después de unas oscilaciones, Se deja de mover el resorte... 90 <= lim <= 180
+    #Después de cierto tiempo, se deja de mover 
     if(t >= lim):
-        offset = 0
+       offset = 0
+       
+    x1, dx1, x2, dx2 = X
 
-    x1,dx1, x2, dx2 = X
+    d1 = np.sqrt((x1-offset)**2)
+    d2 = np.sqrt((x2-x1)*(x2-x1))
+    
+    dv1 = (-beta*dx1 - k1*(d1 - l1)*(offset-x1)/d1 + k2*(d2 - l2)*(x2-x1)/d2)/m1
+    dv2 = (-beta*dx2 + k2*(d2 - l2)*(x1-x2)/d2)/m2
 
-    #Ecuaciones
-    #Ecuación para la masa 1
-    dv1dt = (-k1 * (x1 + offset) + k2*((x2+dx2) - (x1+dx1)) + beta*dx1)/m1
-    #Ecuación para la masa 2
-    dv2dt = (k2*(dx1 - dx2) + beta*dx2)/m2
+    return [dx1,dv1,dx2,dv2]
 
-    return [dx1, dv1dt, dx2, dv2dt]
+t = np.linspace(0,10,1800)
 
-#Simulo desde 90 para que el valor inicial de coseno sea 0
-t = np.linspace(90,180,10000)
-
-#Asumiendo que los resortes tienen su elongación natural acorde a la distancia entre un carrito y el otro
-#El primer argumento es una elongación inicial del primer resorte, el segundo una velocidad incial para la primera masa
-#el tercero una elongación inicial para el segundo resorte y el cuarto una velocidad inicial para la segunda masa
-
-Y = odeint(masaresorte, [0, 0, 0, 0], t)
-
-#Gráfica
-plt.xlabel('tiempo')
-plt.ylabel('aceleración')
-plt.axis('equal')
-plt.legend(['Carro 1','Carro 2'])
-
-#y[1,3] -> Gráfica de la aceleración en función del tiempo
-plt.plot(t,Y[:,1])
-plt.plot(t,Y[:,3])
-plt.show()
-#y[0,2] -> Grafica de la velocidad en función del tiempo
+Y = odeint(masaresorte, [6, 0, 18, 0], t)
 
 plt.xlabel('tiempo')
-plt.ylabel('velocidad')
-plt.axis('equal')
-plt.legend(['Carro 1','Carro 2'])
+plt.ylabel('x')
 
 plt.plot(t,Y[:,0])
 plt.plot(t,Y[:,2])
+plt.legend(['Carro 1','Carro 2'])
+
 plt.show()
 
 fig = plt.figure()
@@ -97,7 +82,7 @@ def animate(i):
     carrito2.xy = (x2, y)
 
     cx, cy = circle.center
-    cx = math.cos((i-45)/120)*scale
+    cx = math.cos((i+90)/180)*2
     circle.center = (cx,cy)
 
     line1 = plt.Arrow(cx, 4, x1 - cx, 0, width=0.2, color="green", hatch='o')
@@ -111,7 +96,7 @@ def animate(i):
 
 anim = animation.FuncAnimation(fig, animate, 
                                init_func=init, 
-                               frames=  1500, 
+                               frames=  1799, 
                                interval=1,
                                blit=True)
 
