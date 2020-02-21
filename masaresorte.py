@@ -8,12 +8,12 @@ from matplotlib import animation
 from matplotlib.patches import ConnectionPatch
 
 #Constantes por fuera for performance purposes
-scale = 0.3 # 0 < scale < 6
+scale = 3 # 0 < scale < 6
 lim = 5
 #Masas
 m1 = 10
 m2 = 5
-beta = 4 #Coeficiente de Friccioń
+beta = 0.8 #Coeficiente de Friccioń
 #Constantes de Elasticidad
 k1 = 100
 k2 = 100
